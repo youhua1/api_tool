@@ -18,7 +18,7 @@ class SdWebui:
         self.models_json_path = models_json_path
         self.data_image_url_path = data_image_url_path
         self.output_image_folder = output_image_folder
-        self.logger = get_logger("SdWbeui")
+        self.logger = get_logger("SdWebui")
         self.utils = Utils(self.logger)
         self.handle_exception = HandleException(self.logger)
 
