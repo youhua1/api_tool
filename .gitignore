@@ -3,4 +3,12 @@
 /json
 /log
 /open_ai_main.py
+/aliyun_ai_main.py
+/barrelling_main.py
+/goodle_cloud_main.py
+/image_to_json_main.py
+/sd_webui_main.py
 /test.py
+/.gitignore
+/scripts/api/open_ai.py
+/scripts/api/sd_webui_segment_anything.py
