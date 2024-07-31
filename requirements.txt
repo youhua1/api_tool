@@ -1,0 +1,10 @@
+aliyun_python_sdk_core==2.15.1
+dashscope==1.19.1
+google_api_python_client==2.133.0
+google_auth_oauthlib==1.2.0
+google_auth==2.30.0
+Pillow==10.4.0
+protobuf==5.27.2
+Requests==2.32.3
+openai==1.37.1
+ipython==8.12.3
