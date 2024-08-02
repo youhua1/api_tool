@@ -164,8 +164,11 @@ class AliyunAi:
         txt_files = self.utils.filter_files(data_path, [".txt"])
 
         for index, txt_path in enumerate(txt_files):
-            text = self.handle_except.txt_error_handler(
-                txt_path, "r", "read").split(input_label)[1]
+            text = self.handle_except.txt_error_handler(txt_path, "r", "read")
+            if text is None:
+                continue
+            text = text.split(input_label)[1]
+
             completion = self.aliyun_llm(llm_prompt, text, llm_model)
             if completion:
                 text_result = completion.choices[0].message.content
@@ -192,8 +195,10 @@ class AliyunAi:
         for index, file_name in enumerate(translate_files):
             txt_path = os.path.join(data_path, file_name.name)
             end_txt_path = os.path.join(train_txt_path, file_name.name)
-            text = self.handle_except.txt_error_handler(
-                txt_path, "r", "read").split(input_label)[1]
+            text = self.handle_except.txt_error_handler(txt_path, "r", "read")
+            if text is None:
+                continue
+            text = text.split(input_label)[1]
 
             translate_text = self.translate_text(text, "zh", "en")
 
@@ -292,6 +297,9 @@ class AliyunAi:
         if os.path.exists(log_file_path):
             data_dict = self.handle_except.txt_error_handler(
                 log_file_path, "r", "json_read")
+            if data_dict is None:
+                return 0, 0
+
             return data_dict["total_tokens"]["input_tokens"], data_dict[
                 "total_tokens"]["output_tokens"]
         return 0, 0

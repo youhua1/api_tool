@@ -32,9 +32,12 @@ class SdWebui:
 
     # 图片url转为列表
     def data_image_url(self):
-        return list(
-            self.handle_exception.txt_error_handler(self.data_image_url_path,
-                                                    "r", "json_read").values())
+        data_image_url_dict = self.handle_exception.txt_error_handler(
+            self.data_image_url_path, "r", "json_read")
+        if data_image_url_dict is None:
+            return []
+
+        return list(data_image_url_dict.values())
 
     # 模板转为列表
     def data_models_json(self):
@@ -46,7 +49,11 @@ class SdWebui:
         return data_json
 
     def base64_json_new(self, url: str, image_url_id: int, models_id: int):
-        image_url = self.data_image_url()[image_url_id]
+        image_url = self.data_image_url()
+        if not image_url:
+            return None
+        image_url = image_url[image_url_id]
+
         image_Image = self.utils.image_url_to_image(image_url)
         image_base64 = self.utils.image_url_to_base64(image_url)
 
@@ -59,14 +66,17 @@ class SdWebui:
         models_json_data = self.data_models_json()
         models_json_name = models_json_data[models_id]
 
-        new_data = (self.handle_exception.txt_error_handler(
-            models_json_name, "r",
-            "read").replace("$width$", str(width)).replace(
-                "$height$",
-                str(height)).replace("$width_hr$", str(width * 1.5)).replace(
-                    "$height_hr$",
-                    str(height * 1.5)).replace("xxxxx", '"xxxxx"').replace(
-                        "$origin_base64_placeholder$", image_base64))
+        data_dict = self.handle_exception.txt_error_handler(
+            models_json_name, "r", "read")
+        if data_dict is None:
+            return None
+
+        new_data = (data_dict.replace("$width$", str(width)).replace(
+            "$height$",
+            str(height)).replace("$width_hr$", str(width * 1.5)).replace(
+                "$height_hr$",
+                str(height * 1.5)).replace("xxxxx", '"xxxxx"').replace(
+                    "$origin_base64_placeholder$", image_base64))
 
         data_dict = json.loads(new_data)
 

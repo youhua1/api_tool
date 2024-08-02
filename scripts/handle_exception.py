@@ -53,7 +53,7 @@ class HandleException:
                 return None
 
         except FileNotFoundError:
-            self.logger.error("无法打开文本文件")
+            self.logger.error(f"没有{txt_path}文本文件")
             return None
 
         except Exception as e:

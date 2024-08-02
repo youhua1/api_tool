@@ -154,6 +154,9 @@ class GoogleDriveAPI:
     def batch_delete_file_in_drive(self, image_json_path: str):
         image_dict = self.handle_exception.txt_error_handler(
             image_json_path, "r", "json_read")
+        if image_dict is None:
+            return None
+
         for image_id in list(image_dict.keys()):
             self.delete_file_in_drive(image_id)
 
