@@ -51,7 +51,13 @@ class SdWebui:
     def base64_json_new(self, url: str, image_url_id: int, models_id: int):
         image_url = self.data_image_url()
         if not image_url:
+            self.logger.error("图片url列表为空")
             return None
+
+        if not (0 <= image_url_id < len(image_url)):
+            self.logger.error("图片URL ID超出范围")
+            return None
+
         image_url = image_url[image_url_id]
 
         image_Image = self.utils.image_url_to_image(image_url)
@@ -64,6 +70,13 @@ class SdWebui:
         width, height = self.utils.image_size(image_Image)
 
         models_json_data = self.data_models_json()
+        if not models_json_data:
+            self.logger.error("模型json列表为空")
+            return None
+
+        if not (0 <= models_id < len(models_json_data)):
+            self.logger.error("模型 ID超出范围")
+            return None
         models_json_name = models_json_data[models_id]
 
         data_dict = self.handle_exception.txt_error_handler(
