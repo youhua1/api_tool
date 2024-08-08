@@ -49,7 +49,7 @@ class AliyunAi:
                     "Data"]:
                 return response_dict["Data"]["Translated"]
         except Exception as e:
-            self.logger.error(f"阿里云翻译 error: {e}")
+            self.logger.error(f"阿里云翻译 error : {e}")
 
         return None
 
@@ -88,7 +88,7 @@ class AliyunAi:
 
             return completion
         except Exception as e:
-            self.logger.error("阿里云llm error:", e)
+            self.logger.error("阿里云llm error: %s", e)
             return None
 
     def aliyun_vl(self,
@@ -114,7 +114,7 @@ class AliyunAi:
             if response.status_code == HTTPStatus.OK:
                 return response
         except Exception as e:
-            self.logger.error("阿里云vl error:", e)
+            self.logger.error("阿里云vl error: %s", e)
             return None
 
     def handle_vl_response(self, image_folder_path, data_path, log_path,
