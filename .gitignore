@@ -2,6 +2,7 @@
 /image
 /json
 /log
+/__pycache__
 /open_ai_main.py
 /aliyun_ai_main.py
 /barrelling_main.py

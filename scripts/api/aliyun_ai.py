@@ -165,14 +165,21 @@ class AliyunAi:
 
         for index, txt_path in enumerate(txt_files):
             text = self.handle_except.txt_error_handler(txt_path, "r", "read")
+
             if text is None:
+                self.logger.error(f"text is None, txt_path:{txt_path}")
+                continue
+            if input_label not in text:
+                self.logger.error(
+                    f"{input_label} not in text, txt_path:{txt_path}")
                 continue
             text = text.split(input_label)[1]
 
             completion = self.aliyun_llm(llm_prompt, text, llm_model)
             if completion:
                 text_result = completion.choices[0].message.content
-                text_result = re.sub(r'["\'\n\{content: |\}]', '', text_result)
+                text_result = re.sub(r'["\'\n\[\]{}content:关键词： ]', '',
+                                     text_result)
                 llm_input_tokens += completion.usage.prompt_tokens
                 llm_output_tokens += completion.usage.completion_tokens
 
@@ -195,8 +202,14 @@ class AliyunAi:
         for index, file_name in enumerate(translate_files):
             txt_path = os.path.join(data_path, file_name.name)
             end_txt_path = os.path.join(train_txt_path, file_name.name)
+
             text = self.handle_except.txt_error_handler(txt_path, "r", "read")
             if text is None:
+                self.logger.error(f"text is None, txt_path:{txt_path}")
+                continue
+            if input_label not in text:
+                self.logger.error(
+                    f"{input_label} not in text, txt_path:{txt_path}")
                 continue
             text = text.split(input_label)[1]
 
@@ -223,7 +236,7 @@ class AliyunAi:
         image_folder_path: str,
         vl_prompt: str,
         llm_prompt: str,
-        filter_llm_prompt: str,
+        # filter_llm_prompt: str,
         vl_model: str = "qwen-vl-plus",
         llm_model: str = "qwen-long",
     ):
@@ -250,13 +263,13 @@ class AliyunAi:
         self.handle_llm_response(data_path, log_path, llm_prompt, llm_model,
                                  "cn_content:", "cn_keyword:")
 
-        # llm过滤过程
-        self.handle_llm_response(data_path, log_path, filter_llm_prompt,
-                                 llm_model, "cn_keyword:", "filter_keyword:")
+        # # llm过滤过程 已弃用
+        # self.handle_llm_response(data_path, log_path, filter_llm_prompt,
+        #                          llm_model, "cn_keyword:", "filter_keyword:")
 
         # 翻译过程
         self.handle_translate_response(train_txt_path, data_path, log_path,
-                                       "filter_keyword:", "en_content:")
+                                       "cn_keyword:", "en_content:")
 
     def log_file(self, model_name, input_tokens, output_tokens,
                  save_folder_path):
