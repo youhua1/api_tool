@@ -1,4 +1,7 @@
 # 获取阿里云模型字典
+import re
+
+
 def get_aliyun_model_dict():
     aliyun_model_dict = {
         "qwen-long": {
@@ -361,8 +364,7 @@ def controlnet_models_dict():
         "control_v11p_sd15_softedge": "control_v11p_sd15_softedge.pth",
         "control_v11p_sd15_canny": "control_v11p_sd15_canny.pth",
         "control_v11p_sd15_openpose": "control_v11p_sd15_openpose.pth",
-        "ip-adapter-faceid-plus_sd15":
-        "ip-adapter-faceid-plus_sd15.pth",
+        "ip-adapter-faceid-plus_sd15": "ip-adapter-faceid-plus_sd15.pth",
         "ip-adapter-faceid-plusv2_sd15": "ip-adapter-faceid-plusv2_sd15.pth",
         "ip-adapter-full-face_sd15": "ip-adapter-full-face_sd15.pth",
         "ip-adapter-plus-face_sd15": "ip-adapter-plus-face_sd15.pth",
@@ -396,8 +398,10 @@ def base64_json_dict(data_dict: dict, models_path: str, image_url: str):
                 "model_name":
                 str(
                     models_path.get(
-                        data_dict["sagemaker_params"]["models"]
-                        ["Stable-diffusion"][0].split(".")[0],
+                        re.sub(
+                            r'\.(safetensors|pt|ckpt)$', '',
+                            data_dict["sagemaker_params"]["models"]
+                            ["Stable-diffusion"][0]),
                         "",
                     ))
             }],
