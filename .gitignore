@@ -10,8 +10,8 @@
 /sd_webui_main.py
 /test.py
 /.gitignore
-/scripts/__pycache__
 /scripts/api/open_ai.py
-/scripts/api/__pycache__
-/scripts/tools/__pycache__
 /scripts/api/sd_webui_segment_anything.py
+__pycache__/
+*.pyc
+*.pyo
