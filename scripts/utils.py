@@ -20,6 +20,12 @@ class Utils:
     def get_file_name(self, file_path):
         return os.path.basename(file_path)
 
+    def download_image(self, url, file_name):
+        try:
+            urllib.request.urlretrieve(url, file_name)
+        except Exception as e:
+            self.logging.error(f"下载图片时出错: {e}")
+
     # 图片转为base64
     def image_to_base64(self, image_path):
         try:

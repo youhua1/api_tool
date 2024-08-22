@@ -160,6 +160,17 @@ class GoogleDriveAPI:
         for image_id in list(image_dict.keys()):
             self.delete_file_in_drive(image_id)
 
+    def batch_download_image(self, image_json_path: str, save_path: str):
+        image_dict = self.handle_exception.txt_error_handler(
+            image_json_path, "r", "json_read")
+        if image_dict is None:
+            return None
+        image_list = list(image_dict.values())
+        for index, image_url in enumerate(image_list):
+            file_name = os.path.join(save_path, f"{index}.jpg")
+            self.utils.download_image(image_url, file_name)
+            self.utils.update_progress((index + 1) / len(image_url), "download image:")
+
     def get_image_info_json(self,
                             folder_name: str,
                             image_folder_path: str = ""):
