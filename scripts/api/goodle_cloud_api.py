@@ -169,7 +169,7 @@ class GoogleDriveAPI:
         for index, image_url in enumerate(image_list):
             file_name = os.path.join(save_path, f"{index}.jpg")
             self.utils.download_image(image_url, file_name)
-            self.utils.update_progress((index + 1) / len(image_url), "download image:")
+            self.utils.update_progress((index + 1) / len(image_list), "download image:")
 
     def get_image_info_json(self,
                             folder_name: str,
