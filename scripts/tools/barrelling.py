@@ -24,9 +24,9 @@ class Barrelling:
 
     # 获得sd最近值
     def get_nearest_ratio_sd(self, ordinary_ratio):
-        if ordinary_ratio > 1.2:
+        if ordinary_ratio > 1.25:
             return 1.5
-        elif ordinary_ratio < 0.8:
+        elif ordinary_ratio < 0.85:
             return 0.67
         else:
             return 1
