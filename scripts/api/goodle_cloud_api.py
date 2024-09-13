@@ -127,6 +127,9 @@ class GoogleDriveAPI:
     def batch_upload_file_to_drive(self, image_folder_path: str,
                                    folder_name: str):
         files = self.utils.filter_files(image_folder_path, [".jpg"])
+        if not files:
+            self.logger.warning("JPG format image not found.")
+
         for file in files:
             # 上传图片文件
             self.upload_file_to_drive(file, file.stem, folder_name)
@@ -169,7 +172,8 @@ class GoogleDriveAPI:
         for index, image_url in enumerate(image_list):
             file_name = os.path.join(save_path, f"{index}.jpg")
             self.utils.download_image(image_url, file_name)
-            self.utils.update_progress((index + 1) / len(image_list), "download image:")
+            self.utils.update_progress((index + 1) / len(image_list),
+                                       "download image:")
 
     def get_image_info_json(self,
                             folder_name: str,
