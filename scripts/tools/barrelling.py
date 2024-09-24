@@ -51,9 +51,8 @@ class Barrelling:
         img = image_data["img"]
         img.save(new_output_path)
 
-    # 调整图片大小
-    def resize_image(self, image_path: str, enable_sd: bool):
-        # 读取图片
+    # 获取图片信息
+    def get_image_info(self, image_path: str, enable_sd: bool):
         img = self.handle_exception.image_error_handler(image_path)
         if img is None:
             return {"img": None}
@@ -72,18 +71,25 @@ class Barrelling:
 
         # 获取调整目标
         image_size = resolution_dict[target_ratio]
-        new_image_size = image_size.split("_")
-        new_image_size_array = [int(num) for num in new_image_size]
-        target_size = min(new_image_size_array)
-
-        # 调整图片
-        img = self.utils.adjust_image_size(img, target_size)
         img_data = {
             "img": img,
             "img_ratio": target_ratio,
             "img_size": image_size
         }
         return img_data
+
+    # 调整图片大小
+    def resize_image(self, image_data: dict):
+
+        # 获取调整目标
+        new_image_size = image_data["img_size"].split("_")
+        new_image_size_array = [int(num) for num in new_image_size]
+        target_size = min(new_image_size_array)
+
+        # 调整图片
+        img = self.utils.adjust_image_size(image_data["img"], target_size)
+        image_data["img"] = img
+        return image_data
 
     # 删除元数据
     def remove_metadata(self, image_path: Path, save_image_path):
@@ -123,19 +129,28 @@ class Barrelling:
             # 删除元数据
             self.remove_metadata(file, image_name)
 
-            if not enable_resize_image:
-                continue
+            # 获取图片信息
+            img_data = self.get_image_info(image_name, enable_sd)
+
             # 调整图片
-            img_data = self.resize_image(image_name, enable_sd)
-            if not isinstance(img_data["img"], Image.Image):
-                continue
+            if enable_resize_image:
+                img_data = self.resize_image(img_data)
+                if not isinstance(img_data["img"], Image.Image):
+                    continue
 
             # 启用分桶
             if enable_bucket:
                 self.barrelling(img_data, image_path, image_name.name)
 
-                # 删除原图片
-                os.remove(image_name)
+                try:
+                    os.remove(image_name)
+                except PermissionError as e:
+                    self.logger.error(
+                        f"Error: {e}. Make sure the file is not open or that you have permission to delete it."
+                    )
+                except Exception as e:
+                    self.logger.error(f"An unexpected error occurred: {e}")
+
             else:
                 img_data["img"].save(image_name)
 
