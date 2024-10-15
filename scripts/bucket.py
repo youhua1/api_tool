@@ -84,6 +84,7 @@ def sagemaker_params_dict(dick_info: dict,
         },
         "sagemaker_endpoint_name": "$sagemaker_endpoint_name$",
         "inference_type": "Async",
+        "origin_placeholder": "$origin_placeholder$",
         "user_account": "$user_account$",
         "template_id": "$temp_id$",
         "template_name": "$temp_name$",
@@ -92,7 +93,6 @@ def sagemaker_params_dict(dick_info: dict,
     # 获取模板类型
     if enable_ai_fasic_art:
         sagemaker_params_dict["task_type"] = "mixmode"
-        sagemaker_params_dict["origin_placeholder"] = "$origin_placeholder$"
         sagemaker_params_dict["template_name"] = template_name
 
     # 获取VAE模型列表
@@ -226,7 +226,7 @@ def i2i_params_dict_explore(dick_info: dict):
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "init_images": ["$origin_placeholder$"],
+            "init_images": ["$origin_base64_placeholder$"],
             "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info['Negative prompt']}",

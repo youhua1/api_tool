@@ -185,6 +185,8 @@ class ImageToJson:
         if enable_t2i:
             # 添加t2i参数
             sd_params_list.append(bucket.t2i_params_dict_explore(dick_info))
+            # 修改t2i sagemaker 参数
+            data_json["sagemaker_params"].pop("origin_placeholder", None)
         else:
             # 添加i2i参数
             sd_params_list.append(bucket.i2i_params_dict_explore(dick_info))
