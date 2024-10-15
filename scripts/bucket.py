@@ -221,6 +221,7 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
 def i2i_params_dict_explore(dick_info: dict):
     i2i_params_dict = {
         "task": "img2img",
+        "origin_prompt": "$origin_prompt$",
         "magic_prompt": "$magic_prompt$",
         "params": {
             "override_settings": {
@@ -375,6 +376,7 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
 def t2i_params_dict_explore(dick_info: dict):
     t2i_params_dict = {
         "task": "txt2img",
+        "origin_prompt": "$origin_prompt$",
         "magic_prompt": "$magic_prompt$",
         "params": {
             "override_settings": {
