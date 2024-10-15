@@ -227,7 +227,7 @@ def i2i_params_dict_explore(dick_info: dict):
                 "CLIP_stop_at_last_layers": 2
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
+            "prompt": f"{dick_info['prompt']}$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info['Negative prompt']}",
             "seed": 200,
@@ -250,46 +250,46 @@ def i2i_params_dict_explore(dick_info: dict):
     resize_mode = dick_info.get("resize_mode", 1)
     i2i_params_dict["params"]["resize_mode"] = resize_mode
 
-    # 获得ControlNet列表
-    controlnet_list = dick_info.get("controlnet", [])
-    if controlnet_list:
-        i2i_params_dict["params"].setdefault(
-            "alwayson_scripts",
-            {}).setdefault("controlnet",
-                           {}).setdefault("args", controlnet_list)
+    # # 获得ControlNet列表
+    # controlnet_list = dick_info.get("controlnet", [])
+    # if controlnet_list:
+    #     i2i_params_dict["params"].setdefault(
+    #         "alwayson_scripts",
+    #         {}).setdefault("controlnet",
+    #                        {}).setdefault("args", controlnet_list)
 
-    # 获得ADetailer列表
-    adetailer_dict = dick_info.get("ADetailer", [])
-    if adetailer_dict:
-        adetailer_dict = adetailer_dict[0]
-        i2i_params_dict["params"].setdefault(
-            "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
-                "args",
-                [
-                    True,
-                    False,
-                    {
-                        "ad_model":
-                        adetailer_dict["ADetailer model"],
-                        "ad_prompt":
-                        "",
-                        "ad_negative_prompt":
-                        "",
-                        "ad_confidence":
-                        adetailer_dict["ADetailer confidence"],
-                        "ad_dilate_erode":
-                        adetailer_dict["ADetailer dilate erode"],
-                        "ad_mask_blur":
-                        adetailer_dict["ADetailer mask blur"],
-                        "ad_denoising_strength":
-                        adetailer_dict["ADetailer denoising strength"],
-                        "ad_inpaint_only_masked":
-                        adetailer_dict["ADetailer inpaint only masked"],
-                        "ad_inpaint_only_masked_padding":
-                        adetailer_dict["ADetailer inpaint padding"],
-                    },
-                ],
-            )
+    # # 获得ADetailer列表
+    # adetailer_dict = dick_info.get("ADetailer", [])
+    # if adetailer_dict:
+    #     adetailer_dict = adetailer_dict[0]
+    #     i2i_params_dict["params"].setdefault(
+    #         "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
+    #             "args",
+    #             [
+    #                 True,
+    #                 False,
+    #                 {
+    #                     "ad_model":
+    #                     adetailer_dict["ADetailer model"],
+    #                     "ad_prompt":
+    #                     "",
+    #                     "ad_negative_prompt":
+    #                     "",
+    #                     "ad_confidence":
+    #                     adetailer_dict["ADetailer confidence"],
+    #                     "ad_dilate_erode":
+    #                     adetailer_dict["ADetailer dilate erode"],
+    #                     "ad_mask_blur":
+    #                     adetailer_dict["ADetailer mask blur"],
+    #                     "ad_denoising_strength":
+    #                     adetailer_dict["ADetailer denoising strength"],
+    #                     "ad_inpaint_only_masked":
+    #                     adetailer_dict["ADetailer inpaint only masked"],
+    #                     "ad_inpaint_only_masked_padding":
+    #                     adetailer_dict["ADetailer inpaint padding"],
+    #                 },
+    #             ],
+    #         )
 
     return i2i_params_dict
 
@@ -301,7 +301,7 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": f"$tagger_placeholder$,{dick_info['prompt']}",
+            "prompt": f"{dick_info['prompt']}$tagger_placeholder$,",
             "negative_prompt": dick_info['Negative prompt'],
             "seed": -1,
             "subseed": -1,
@@ -382,7 +382,7 @@ def t2i_params_dict_explore(dick_info: dict):
             },
             "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
             "negative_prompt":
-            f"$negative_prompt_placeholder${dick_info['Negative prompt']}",
+            f"$negative_prompt_placeholder$,{dick_info['Negative prompt']}",
             "seed": 200,
             "subseed": -1,
             "subseed_strength": 0,
@@ -408,46 +408,46 @@ def t2i_params_dict_explore(dick_info: dict):
     if vae:
         t2i_params_dict["params"]["vae"] = vae
 
-    # 获得ControlNet列表
-    controlnet_list = dick_info.get("controlnet", [])
-    if controlnet_list:
-        t2i_params_dict["params"].setdefault(
-            "alwayson_scripts",
-            {}).setdefault("controlnet",
-                           {}).setdefault("args", controlnet_list)
+    # # 获得ControlNet列表
+    # controlnet_list = dick_info.get("controlnet", [])
+    # if controlnet_list:
+    #     t2i_params_dict["params"].setdefault(
+    #         "alwayson_scripts",
+    #         {}).setdefault("controlnet",
+    #                        {}).setdefault("args", controlnet_list)
 
-    # 获得ADetailer列表
-    adetailer_dict = dick_info.get("ADetailer", [])
-    if adetailer_dict:
-        adetailer_dict = adetailer_dict[0]
-        t2i_params_dict["params"].setdefault(
-            "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
-                "args",
-                [
-                    True,
-                    False,
-                    {
-                        "ad_model":
-                        adetailer_dict["ADetailer model"],
-                        "ad_prompt":
-                        "",
-                        "ad_negative_prompt":
-                        "",
-                        "ad_confidence":
-                        adetailer_dict["ADetailer confidence"],
-                        "ad_dilate_erode":
-                        adetailer_dict["ADetailer dilate erode"],
-                        "ad_mask_blur":
-                        adetailer_dict["ADetailer mask blur"],
-                        "ad_denoising_strength":
-                        adetailer_dict["ADetailer denoising strength"],
-                        "ad_inpaint_only_masked":
-                        adetailer_dict["ADetailer inpaint only masked"],
-                        "ad_inpaint_only_masked_padding":
-                        adetailer_dict["ADetailer inpaint padding"],
-                    },
-                ],
-            )
+    # # 获得ADetailer列表
+    # adetailer_dict = dick_info.get("ADetailer", [])
+    # if adetailer_dict:
+    #     adetailer_dict = adetailer_dict[0]
+    #     t2i_params_dict["params"].setdefault(
+    #         "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
+    #             "args",
+    #             [
+    #                 True,
+    #                 False,
+    #                 {
+    #                     "ad_model":
+    #                     adetailer_dict["ADetailer model"],
+    #                     "ad_prompt":
+    #                     "",
+    #                     "ad_negative_prompt":
+    #                     "",
+    #                     "ad_confidence":
+    #                     adetailer_dict["ADetailer confidence"],
+    #                     "ad_dilate_erode":
+    #                     adetailer_dict["ADetailer dilate erode"],
+    #                     "ad_mask_blur":
+    #                     adetailer_dict["ADetailer mask blur"],
+    #                     "ad_denoising_strength":
+    #                     adetailer_dict["ADetailer denoising strength"],
+    #                     "ad_inpaint_only_masked":
+    #                     adetailer_dict["ADetailer inpaint only masked"],
+    #                     "ad_inpaint_only_masked_padding":
+    #                     adetailer_dict["ADetailer inpaint padding"],
+    #                 },
+    #             ],
+    #         )
 
     return t2i_params_dict
 
