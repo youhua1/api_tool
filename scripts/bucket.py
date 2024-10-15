@@ -74,19 +74,26 @@ def get_resolution_dict(enable_sd: bool = False):
     return resolution_dict_sd if enable_sd else resolution_dict_xl
 
 
-def sagemaker_params_dict(dick_info: dict, template_name: str = ""):
+def sagemaker_params_dict(dick_info: dict,
+                          template_name: str = "",
+                          enable_ai_fasic_art: bool = False):
     sagemaker_params_dict = {
-        "task_type": "mixmode",
+        "task_type": "loremode",
         "models": {
             "Stable-diffusion": [f"{dick_info['Model']}.safetensors"]
         },
         "sagemaker_endpoint_name": "$sagemaker_endpoint_name$",
         "inference_type": "Async",
-        "origin_placeholder": "$origin_placeholder$",
         "user_account": "$user_account$",
         "template_id": "$temp_id$",
-        "template_name": template_name,
+        "template_name": "$temp_name$",
     }
+
+    # 获取模板类型
+    if enable_ai_fasic_art:
+        sagemaker_params_dict["task_type"] = "mixmode"
+        sagemaker_params_dict["origin_placeholder"] = "$origin_placeholder$"
+        sagemaker_params_dict["template_name"] = template_name
 
     # 获取VAE模型列表
     vae = dick_info.get("VAE", "")
@@ -134,7 +141,7 @@ def wd1_4_params_dict(wd1_4_threshold: str = 0.85):
     return wd1_4_params_dict
 
 
-def i2i_params_dict(dick_info: dict):
+def i2i_params_dict_ai_fasic_art(dick_info: dict):
     i2i_params_dict = {
         "task": "img2img",
         "params": {
@@ -142,7 +149,7 @@ def i2i_params_dict(dick_info: dict):
                 "CLIP_stop_at_last_layers": 2
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": dick_info["prompt"],
+            "prompt": f"$tagger_placeholder$,{dick_info['prompt']}",
             "negative_prompt": dick_info["Negative prompt"],
             "seed": -1,
             "subseed": -1,
@@ -211,15 +218,91 @@ def i2i_params_dict(dick_info: dict):
     return i2i_params_dict
 
 
-def t2i_params_dict(dick_info: dict):
+def i2i_params_dict_explore(dick_info: dict):
+    i2i_params_dict = {
+        "task": "img2img",
+        "magic_prompt": "$magic_prompt$",
+        "params": {
+            "override_settings": {
+                "CLIP_stop_at_last_layers": 2
+            },
+            "init_images": ["$origin_placeholder$"],
+            "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
+            "negative_prompt":
+            f"$negative_prompt_placeholder$,{dick_info['Negative prompt']}",
+            "seed": 200,
+            "subseed": -1,
+            "subseed_strength": 0,
+            "seed_resize_from_h": -1,
+            "seed_resize_from_w": -1,
+            "sampler_name": dick_info["Sampler"],
+            "batch_size": 1,
+            "n_iter": 1,
+            "steps": 201,
+            "cfg_scale": 202,
+            "width": 203,
+            "height": 204,
+            "denoising_strength": 205,
+        },
+    }
+
+    # 获得resize_mode
+    resize_mode = dick_info.get("resize_mode", 1)
+    i2i_params_dict["params"]["resize_mode"] = resize_mode
+
+    # 获得ControlNet列表
+    controlnet_list = dick_info.get("controlnet", [])
+    if controlnet_list:
+        i2i_params_dict["params"].setdefault(
+            "alwayson_scripts",
+            {}).setdefault("controlnet",
+                           {}).setdefault("args", controlnet_list)
+
+    # 获得ADetailer列表
+    adetailer_dict = dick_info.get("ADetailer", [])
+    if adetailer_dict:
+        adetailer_dict = adetailer_dict[0]
+        i2i_params_dict["params"].setdefault(
+            "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
+                "args",
+                [
+                    True,
+                    False,
+                    {
+                        "ad_model":
+                        adetailer_dict["ADetailer model"],
+                        "ad_prompt":
+                        "",
+                        "ad_negative_prompt":
+                        "",
+                        "ad_confidence":
+                        adetailer_dict["ADetailer confidence"],
+                        "ad_dilate_erode":
+                        adetailer_dict["ADetailer dilate erode"],
+                        "ad_mask_blur":
+                        adetailer_dict["ADetailer mask blur"],
+                        "ad_denoising_strength":
+                        adetailer_dict["ADetailer denoising strength"],
+                        "ad_inpaint_only_masked":
+                        adetailer_dict["ADetailer inpaint only masked"],
+                        "ad_inpaint_only_masked_padding":
+                        adetailer_dict["ADetailer inpaint padding"],
+                    },
+                ],
+            )
+
+    return i2i_params_dict
+
+
+def t2i_params_dict_ai_fasic_art(dick_info: dict):
     t2i_params_dict = {
         "task": "txt2img",
         "params": {
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": dick_info["prompt"],
-            "negative_prompt": dick_info["Negative prompt"],
+            "prompt": f"$tagger_placeholder$,{dick_info['prompt']}",
+            "negative_prompt": dick_info['Negative prompt'],
             "seed": -1,
             "subseed": -1,
             "subseed_strength": 0,
@@ -232,6 +315,86 @@ def t2i_params_dict(dick_info: dict):
             "cfg_scale": float(dick_info["CFG scale"]),
             "width": 666,
             "height": 667,
+            "enable_hr": False,
+            "hr_second_pass_steps": 0,
+            "hr_scale": 2,
+            "hr_upscaler": "8x_NMKD-Superscale_150000_G",
+            "denoising_strength": 0.4,
+        },
+    }
+
+    # 获得VAE模型列表
+    vae = dick_info.get("VAE", "")
+    if vae:
+        t2i_params_dict["params"]["vae"] = vae
+
+    # 获得ControlNet列表
+    controlnet_list = dick_info.get("controlnet", [])
+    if controlnet_list:
+        t2i_params_dict["params"].setdefault(
+            "alwayson_scripts",
+            {}).setdefault("controlnet",
+                           {}).setdefault("args", controlnet_list)
+
+    # 获得ADetailer列表
+    adetailer_dict = dick_info.get("ADetailer", [])
+    if adetailer_dict:
+        adetailer_dict = adetailer_dict[0]
+        t2i_params_dict["params"].setdefault(
+            "alwayson_scripts", {}).setdefault("ADetailer", {}).setdefault(
+                "args",
+                [
+                    True,
+                    False,
+                    {
+                        "ad_model":
+                        adetailer_dict["ADetailer model"],
+                        "ad_prompt":
+                        "",
+                        "ad_negative_prompt":
+                        "",
+                        "ad_confidence":
+                        adetailer_dict["ADetailer confidence"],
+                        "ad_dilate_erode":
+                        adetailer_dict["ADetailer dilate erode"],
+                        "ad_mask_blur":
+                        adetailer_dict["ADetailer mask blur"],
+                        "ad_denoising_strength":
+                        adetailer_dict["ADetailer denoising strength"],
+                        "ad_inpaint_only_masked":
+                        adetailer_dict["ADetailer inpaint only masked"],
+                        "ad_inpaint_only_masked_padding":
+                        adetailer_dict["ADetailer inpaint padding"],
+                    },
+                ],
+            )
+
+    return t2i_params_dict
+
+
+def t2i_params_dict_explore(dick_info: dict):
+    t2i_params_dict = {
+        "task": "txt2img",
+        "magic_prompt": "$magic_prompt$",
+        "params": {
+            "override_settings": {
+                "CLIP_stop_at_last_layers": 2
+            },
+            "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
+            "negative_prompt":
+            f"$negative_prompt_placeholder${dick_info['Negative prompt']}",
+            "seed": 200,
+            "subseed": -1,
+            "subseed_strength": 0,
+            "seed_resize_from_h": -1,
+            "seed_resize_from_w": -1,
+            "sampler_name": dick_info["Sampler"],
+            "batch_size": 1,
+            "n_iter": 1,
+            "steps": 201,
+            "cfg_scale": 202,
+            "width": 203,
+            "height": 204,
             "enable_hr": False,
             "hr_second_pass_steps": 0,
             "hr_scale": 2,

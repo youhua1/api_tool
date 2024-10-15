@@ -125,7 +125,7 @@ class ImageToJson:
 
         return parameter
 
-    def dickInfo_to_json(
+    def dickInfo_to_json_ai_fasic_art(
         self,
         dick_info: dict,
         template_name: str,
@@ -138,7 +138,7 @@ class ImageToJson:
 
         # 添加sagemaker参数
         data_json["sagemaker_params"] = bucket.sagemaker_params_dict(
-            dick_info, template_name)
+            dick_info, template_name, True)
 
         # 启用cont_face时，添加cont_face参数
         if enable_cont_face:
@@ -149,10 +149,12 @@ class ImageToJson:
 
         if enable_t2i:
             # 添加t2i参数
-            sd_params_list.append(bucket.t2i_params_dict(dick_info))
+            sd_params_list.append(
+                bucket.t2i_params_dict_ai_fasic_art(dick_info))
         else:
             # 添加i2i参数
-            sd_params_list.append(bucket.i2i_params_dict(dick_info))
+            sd_params_list.append(
+                bucket.i2i_params_dict_ai_fasic_art(dick_info))
 
         # 添加extra_single_image参数
         sd_params_list.append(bucket.extra_single_image_params_dict())
@@ -165,7 +167,36 @@ class ImageToJson:
         data_json["sd_params"] = sd_params_list
         return data_json
 
-    def get_image_info_json(
+    def dickInfo_to_json_explore(self, dick_info: dict, template_name: str,
+                                 enable_t2i: bool):
+        # 添加expire_timestamp参数
+        data_json = {
+            "expire_timestamp": "xxxxx",
+            "inference_id": "$inference_id$"
+        }
+
+        # 添加sagemaker参数
+        data_json["sagemaker_params"] = bucket.sagemaker_params_dict(
+            dick_info, template_name)
+
+        # 设置空列表
+        sd_params_list = []
+
+        if enable_t2i:
+            # 添加t2i参数
+            sd_params_list.append(bucket.t2i_params_dict_explore(dick_info))
+        else:
+            # 添加i2i参数
+            sd_params_list.append(bucket.i2i_params_dict_explore(dick_info))
+
+        # # 添加extra_single_image参数
+        # sd_params_list.append(bucket.extra_single_image_params_dict())
+
+        # 整合sd_params_list的参数
+        data_json["sd_params"] = sd_params_list
+        return data_json
+
+    def get_image_info_json_ai_fasic_art(
         self,
         image_path,
         enable_t2i: bool,
@@ -176,9 +207,11 @@ class ImageToJson:
         if dick_info is None:
             return None
 
-        data_json = self.dickInfo_to_json(dick_info, image_path.stem,
-                                          enable_t2i, enable_cont_face,
-                                          enable_reactor)
+        data_json = self.dickInfo_to_json_ai_fasic_art(dick_info,
+                                                       image_path.stem,
+                                                       enable_t2i,
+                                                       enable_cont_face,
+                                                       enable_reactor)
 
         data_str = json.dumps(data_json, indent=4)
         data_str = (data_str.replace('"xxxxx"', "xxxxx").replace(
@@ -186,29 +219,59 @@ class ImageToJson:
 
         return data_str
 
+    def get_image_info_json_explore(self, image_path, enable_t2i: bool):
+        dick_info = self.imageInfo_to_dickInfo(image_path)
+        if dick_info is None:
+            return None
+
+        data_json = self.dickInfo_to_json_explore(dick_info, image_path.stem,
+                                                  enable_t2i)
+
+        data_str = json.dumps(data_json, indent=4)
+        data_str = (data_str.replace('"xxxxx"', "xxxxx").replace(
+            "200", "$seed$").replace("201", "$steps$").replace("202", "$cfg_scale$").replace("203", "$width$").replace(
+                "204", "$height$").replace("205", "$denoising_strength$"))
+
+        return data_str
+
     def batch_image_info_json(
         self,
         image_folder_path: str,
+        enable_ai_fasic_art: bool = True,
         enable_t2i: bool = True,
         enable_cont_face: bool = False,
         enable_reactor: bool = False,
     ):
+        # 获取图片文件
         files = self.utils.filter_files(image_folder_path, [".png", ".jpg"])
 
-        for index, file in enumerate(files):
-            data_str = self.get_image_info_json(
-                file,
-                enable_t2i,
-                enable_cont_face,
-                enable_reactor,
-            )
-
+        # 定义保存 JSON 文件的通用方法
+        def save_json(file, prefix: str, data_str: str):
             if data_str is None:
-                continue
-
-            # 保存为txt文件
-            save_path = file.with_stem(f"{file.stem}_json").with_suffix(".txt")
+                return
+            save_path = file.with_stem(
+                f"{file.stem}_{prefix}_json").with_suffix(".txt")
             self.handle_exception.txt_error_handler(save_path, "w", "write",
                                                     data_str)
-            self.utils.update_progress((index + 1) / len(files),
-                                       "Processing ImageToJson:")
+
+        # 如果启用了 AI Fasic Art 处理
+        if enable_ai_fasic_art:
+            for index, file in enumerate(files):
+                data_str = self.get_image_info_json_ai_fasic_art(
+                    file, enable_t2i, enable_cont_face, enable_reactor)
+                save_json(file, "ai_fasic_art", data_str)
+                self.utils.update_progress((index + 1) / len(files),
+                                           "Processing ImageToJsonAiFasicArt:")
+        else:
+            # 否则使用 Explore 处理方式
+            for index, file in enumerate(files):
+                # T2I处理
+                data_str = self.get_image_info_json_explore(file, True)
+                save_json(file, "t2i", data_str)
+
+                # I2I处理
+                data_str = self.get_image_info_json_explore(file, False)
+                save_json(file, "i2i", data_str)
+
+                self.utils.update_progress((index + 1) / len(files),
+                                           "Processing ImageToJsonExplore:")
