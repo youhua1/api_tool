@@ -52,7 +52,7 @@ class SdWebui:
                         url: str,
                         image_url_id: int,
                         models_id: int,
-                        hyperparameter_data: dict = None):
+                        hyperparameter_data: dict = {}):
         image_url = self.data_image_url()
         if not image_url:
             self.logger.error("图片url列表为空")
@@ -386,7 +386,7 @@ class SdWebui:
                      url: str,
                      models_id: int,
                      image_url_id: int,
-                     hyperparameter_data: dict = None):
+                     hyperparameter_data: dict = {}):
         # 解析超参数
         main_json = self.base64_json_new(url, image_url_id, models_id,
                                          hyperparameter_data)
