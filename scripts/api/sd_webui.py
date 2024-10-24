@@ -48,7 +48,11 @@ class SdWebui:
         data_json.sort()
         return data_json
 
-    def base64_json_new(self, url: str, image_url_id: int, models_id: int):
+    def base64_json_new(self,
+                        url: str,
+                        image_url_id: int,
+                        models_id: int,
+                        hyperparameter_data: dict = None):
         image_url = self.data_image_url()
         if not image_url:
             self.logger.error("图片url列表为空")
@@ -84,13 +88,32 @@ class SdWebui:
         if data_dict is None:
             return None
 
+        # 替换占位符
         new_data = (data_dict.replace("$width$", str(width)).replace(
             "$height$",
             str(height)).replace("$width_hr$", str(width * 1.5)).replace(
                 "$height_hr$",
                 str(height * 1.5)).replace("xxxxx", '"xxxxx"').replace(
-                    "$origin_base64_placeholder$", image_base64))
-
+                    "$origin_base64_placeholder$",
+                    image_base64)).replace("$magic_prompt$", 'false').replace(
+                        "$prompt_placeholder$",
+                        hyperparameter_data.get("prompt", "")
+                    ).replace(
+                        "$negative_prompt_placeholder$",
+                        hyperparameter_data.get("negative_prompt", "")
+                    ).replace(
+                        "$seed$",
+                        f'{hyperparameter_data.get("seed", -1)}'
+                    ).replace(
+                        "$steps$", f'{hyperparameter_data.get("steps", 20)}'
+                    ).replace(
+                        "$cfg_scale$",
+                        f'{hyperparameter_data.get("cfg_scale", 7.5)}'
+                    ).replace(
+                        "$denoising_strength$",
+                        f'{hyperparameter_data.get("denoising_strength", 0.5)}'
+                    )
+        # 转换为json
         data_dict = json.loads(new_data)
 
         # 查找模型路径
@@ -359,8 +382,14 @@ class SdWebui:
             if index == len(payload) - 1:
                 return response_dict
 
-    def main_process(self, url: str, models_id: int, image_url_id: int):
-        main_json = self.base64_json_new(url, image_url_id, models_id)
+    def main_process(self,
+                     url: str,
+                     models_id: int,
+                     image_url_id: int,
+                     hyperparameter_data: dict = None):
+        # 解析超参数
+        main_json = self.base64_json_new(url, image_url_id, models_id,
+                                         hyperparameter_data)
         if main_json is None:
             return
 
@@ -381,10 +410,12 @@ class SdWebui:
             return
         self.logger.info(f"{url}_保存图片成功: {file_name}")
 
-    def thread_entry(self, urls: list, models_id: int, image_url_id: int):
+    def thread_entry(self, urls: list, models_id: int, image_url_id: int,
+                     hyperparameter_data: dict):
         # 创建一个线程池，用于所有任务
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             [
                 executor.submit(self.main_process, url, models_id,
-                                image_url_id) for url in urls
+                                image_url_id, hyperparameter_data)
+                for url in urls
             ]

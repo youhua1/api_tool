@@ -149,7 +149,7 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
                 "CLIP_stop_at_last_layers": 2
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": f"$tagger_placeholder$,{dick_info['prompt']}",
+            "prompt": f"{dick_info['prompt']},$tagger_placeholder$,",
             "negative_prompt": dick_info["Negative prompt"],
             "seed": -1,
             "subseed": -1,
@@ -166,6 +166,11 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
         },
     }
 
+    # 获得VAE模型列表
+    vae = dick_info.get("VAE", "")
+    if vae:
+        i2i_params_dict["params"]["VAE"] = vae
+        
     # 获得resize_mode
     resize_mode = dick_info.get("resize_mode", 1)
     i2i_params_dict["params"]["resize_mode"] = resize_mode
@@ -222,7 +227,7 @@ def i2i_params_dict_explore(dick_info: dict):
     i2i_params_dict = {
         "task": "img2img",
         "origin_prompt": "$origin_prompt$",
-        "magic_prompt": "$magic_prompt$",
+        "magic_prompt": 199,
         "params": {
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
@@ -246,6 +251,11 @@ def i2i_params_dict_explore(dick_info: dict):
             "denoising_strength": 205,
         },
     }
+
+    # 获得VAE模型列表
+    vae = dick_info.get("VAE", "")
+    if vae:
+        i2i_params_dict["params"]["VAE"] = vae
 
     # 获得resize_mode
     resize_mode = dick_info.get("resize_mode", 1)
@@ -302,7 +312,7 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": f"{dick_info['prompt']}$tagger_placeholder$,",
+            "prompt": f"{dick_info['prompt']},$tagger_placeholder$,",
             "negative_prompt": dick_info['Negative prompt'],
             "seed": -1,
             "subseed": -1,
@@ -327,7 +337,7 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
     # 获得VAE模型列表
     vae = dick_info.get("VAE", "")
     if vae:
-        t2i_params_dict["params"]["vae"] = vae
+        t2i_params_dict["params"]["VAE"] = vae
 
     # 获得ControlNet列表
     controlnet_list = dick_info.get("controlnet", [])
@@ -377,12 +387,12 @@ def t2i_params_dict_explore(dick_info: dict):
     t2i_params_dict = {
         "task": "txt2img",
         "origin_prompt": "$origin_prompt$",
-        "magic_prompt": "$magic_prompt$",
+        "magic_prompt": 199,
         "params": {
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": f"$prompt_placeholder$,{dick_info['prompt']}",
+            "prompt": f"{dick_info['prompt']},$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info['Negative prompt']}",
             "seed": 200,
@@ -408,7 +418,7 @@ def t2i_params_dict_explore(dick_info: dict):
     # 获得VAE模型列表
     vae = dick_info.get("VAE", "")
     if vae:
-        t2i_params_dict["params"]["vae"] = vae
+        t2i_params_dict["params"]["VAE"] = vae
 
     # # 获得ControlNet列表
     # controlnet_list = dick_info.get("controlnet", [])
