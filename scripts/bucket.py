@@ -146,7 +146,11 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
         "task": "img2img",
         "params": {
             "override_settings": {
-                "CLIP_stop_at_last_layers": 2
+                "CLIP_stop_at_last_layers":
+                2,
+                "sd_vae":
+                dick_info.get("VAE",
+                              "vae-ft-mse-840000-ema-pruned.safetensors")
             },
             "init_images": ["$origin_base64_placeholder$"],
             "prompt": f"{dick_info.get('prompt', '')},$tagger_placeholder$,",
@@ -156,28 +160,17 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
             "seed_resize_from_w": -1,
-            "sampler_name": dick_info["Sampler"],
+            "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
-            "steps": int(dick_info["Steps"]),
-            "cfg_scale": float(dick_info["CFG scale"]),
+            "steps": int(dick_info.get("Steps", "20")),
+            "cfg_scale": float(dick_info.get("CFG scale", "7.0")),
             "width": 666,
             "height": 667,
+            "resize_mode": dick_info.get("resize_mode", 1),
+            "denoising_strength": dick_info.get("Denoising strength", 0.4)
         },
     }
-
-    # 获得VAE模型列表
-    vae = dick_info.get("VAE", "")
-    if vae:
-        i2i_params_dict["params"]["VAE"] = vae
-
-    # 获得resize_mode
-    resize_mode = dick_info.get("resize_mode", 1)
-    i2i_params_dict["params"]["resize_mode"] = resize_mode
-
-    # 获得denoising_strength
-    denoising_strength = dick_info.get("Denoising strength", 0.4)
-    i2i_params_dict["params"]["denoising_strength"] = denoising_strength
 
     # 获得ControlNet列表
     controlnet_list = dick_info.get("controlnet", [])
@@ -230,7 +223,11 @@ def i2i_params_dict_explore(dick_info: dict):
         "magic_prompt": 199,
         "params": {
             "override_settings": {
-                "CLIP_stop_at_last_layers": 2
+                "CLIP_stop_at_last_layers":
+                2,
+                "sd_vae":
+                dick_info.get("VAE",
+                              "vae-ft-mse-840000-ema-pruned.safetensors")
             },
             "init_images": ["$origin_base64_placeholder$"],
             "prompt": f"{dick_info.get('prompt', '')}$prompt_placeholder$,",
@@ -241,7 +238,7 @@ def i2i_params_dict_explore(dick_info: dict):
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
             "seed_resize_from_w": -1,
-            "sampler_name": dick_info["Sampler"],
+            "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
             "steps": 201,
@@ -249,17 +246,9 @@ def i2i_params_dict_explore(dick_info: dict):
             "width": 203,
             "height": 204,
             "denoising_strength": 205,
+            "resize_mode": dick_info.get("resize_mode", 1)
         },
     }
-
-    # 获得VAE模型列表
-    vae = dick_info.get("VAE", "")
-    if vae:
-        i2i_params_dict["params"]["VAE"] = vae
-
-    # 获得resize_mode
-    resize_mode = dick_info.get("resize_mode", 1)
-    i2i_params_dict["params"]["resize_mode"] = resize_mode
 
     # # 获得ControlNet列表
     # controlnet_list = dick_info.get("controlnet", [])
@@ -310,7 +299,11 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
         "task": "txt2img",
         "params": {
             "override_settings": {
-                "CLIP_stop_at_last_layers": 2
+                "CLIP_stop_at_last_layers":
+                2,
+                "sd_vae":
+                dick_info.get("VAE",
+                              "vae-ft-mse-840000-ema-pruned.safetensors")
             },
             "prompt": f"{dick_info.get('prompt', '')},$tagger_placeholder$,",
             "negative_prompt": dick_info.get('Negative prompt', ''),
@@ -319,11 +312,11 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
             "seed_resize_from_w": -1,
-            "sampler_name": dick_info["Sampler"],
+            "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
-            "steps": int(dick_info["Steps"]),
-            "cfg_scale": float(dick_info["CFG scale"]),
+            "steps": int(dick_info.get("Steps", "20")),
+            "cfg_scale": float(dick_info.get("CFG scale", "7.0")),
             "width": 666,
             "height": 667,
             "enable_hr": False,
@@ -333,11 +326,6 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
             "denoising_strength": 0.4,
         },
     }
-
-    # 获得VAE模型列表
-    vae = dick_info.get("VAE", "")
-    if vae:
-        t2i_params_dict["params"]["VAE"] = vae
 
     # 获得ControlNet列表
     controlnet_list = dick_info.get("controlnet", [])
@@ -390,7 +378,11 @@ def t2i_params_dict_explore(dick_info: dict):
         "magic_prompt": 199,
         "params": {
             "override_settings": {
-                "CLIP_stop_at_last_layers": 2
+                "CLIP_stop_at_last_layers":
+                2,
+                "sd_vae":
+                dick_info.get("VAE",
+                              "vae-ft-mse-840000-ema-pruned.safetensors")
             },
             "prompt": f"{dick_info.get('prompt', '')},$prompt_placeholder$,",
             "negative_prompt":
@@ -400,7 +392,7 @@ def t2i_params_dict_explore(dick_info: dict):
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
             "seed_resize_from_w": -1,
-            "sampler_name": dick_info["Sampler"],
+            "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
             "steps": 201,
@@ -414,11 +406,6 @@ def t2i_params_dict_explore(dick_info: dict):
             "denoising_strength": 0.4,
         },
     }
-
-    # 获得VAE模型列表
-    vae = dick_info.get("VAE", "")
-    if vae:
-        t2i_params_dict["params"]["VAE"] = vae
 
     # # 获得ControlNet列表
     # controlnet_list = dick_info.get("controlnet", [])

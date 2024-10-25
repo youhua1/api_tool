@@ -89,30 +89,34 @@ class SdWebui:
             return None
 
         # 替换占位符
-        new_data = (data_dict.replace("$width$", str(width)).replace(
-            "$height$",
-            str(height)).replace("$width_hr$", str(width * 1.5)).replace(
-                "$height_hr$",
-                str(height * 1.5)).replace("xxxxx", '"xxxxx"').replace(
-                    "$origin_base64_placeholder$",
-                    image_base64)).replace("$magic_prompt$", 'false').replace(
-                        "$prompt_placeholder$",
-                        hyperparameter_data.get("prompt", "")
-                    ).replace(
-                        "$negative_prompt_placeholder$",
-                        hyperparameter_data.get("negative_prompt", "")
-                    ).replace(
-                        "$seed$",
-                        f'{hyperparameter_data.get("seed", -1)}'
-                    ).replace(
-                        "$steps$", f'{hyperparameter_data.get("steps", 20)}'
-                    ).replace(
-                        "$cfg_scale$",
-                        f'{hyperparameter_data.get("cfg_scale", 7.5)}'
-                    ).replace(
-                        "$denoising_strength$",
-                        f'{hyperparameter_data.get("denoising_strength", 0.5)}'
-                    )
+        new_data = (
+            data_dict.replace(
+                "$width$",
+                str(hyperparameter_data.get("width", width))).replace(
+                    "$height$",
+                    str(hyperparameter_data.get("height", height))).replace(
+                        "$width_hr$", str(width * 1.5)).replace(
+                            "$height_hr$", str(height * 1.5)).replace(
+                                "xxxxx", '"xxxxx"').replace(
+                                    "$origin_base64_placeholder$",
+                                    image_base64)
+        ).replace(
+            "$magic_prompt$",
+            'false'
+        ).replace("$prompt_placeholder$", hyperparameter_data.get(
+            "prompt", ""
+        )).replace("$negative_prompt_placeholder$",
+                   hyperparameter_data.get("negative_prompt", "")).replace(
+                       "$seed$", f'{hyperparameter_data.get("seed", -1)}'
+                   ).replace(
+                       "$steps$",
+                       f'{hyperparameter_data.get("steps", 20)}'
+                   ).replace(
+                       "$cfg_scale$",
+                       f'{hyperparameter_data.get("cfg_scale", 7.5)}'
+                   ).replace(
+                       "$denoising_strength$",
+                       f'{hyperparameter_data.get("denoising_strength", 0.5)}')
         # 转换为json
         data_dict = json.loads(new_data)
 
