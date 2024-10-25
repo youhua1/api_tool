@@ -149,7 +149,7 @@ def i2i_params_dict_ai_fasic_art(dick_info: dict):
                 "CLIP_stop_at_last_layers": 2
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": f"{dick_info.get('Prompt', '')},$tagger_placeholder$,",
+            "prompt": f"{dick_info.get('prompt', '')},$tagger_placeholder$,",
             "negative_prompt": dick_info.get('Negative prompt', ''),
             "seed": -1,
             "subseed": -1,
@@ -233,7 +233,7 @@ def i2i_params_dict_explore(dick_info: dict):
                 "CLIP_stop_at_last_layers": 2
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": f"{dick_info.get('Prompt', '')}$prompt_placeholder$,",
+            "prompt": f"{dick_info.get('prompt', '')}$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info.get('Negative prompt', '')}",
             "seed": 200,
@@ -312,7 +312,7 @@ def t2i_params_dict_ai_fasic_art(dick_info: dict):
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": f"{dick_info.get('Prompt', '')},$tagger_placeholder$,",
+            "prompt": f"{dick_info.get('prompt', '')},$tagger_placeholder$,",
             "negative_prompt": dick_info.get('Negative prompt', ''),
             "seed": -1,
             "subseed": -1,
@@ -392,7 +392,7 @@ def t2i_params_dict_explore(dick_info: dict):
             "override_settings": {
                 "CLIP_stop_at_last_layers": 2
             },
-            "prompt": f"{dick_info.get('Prompt', '')},$prompt_placeholder$,",
+            "prompt": f"{dick_info.get('prompt', '')},$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info.get('Negative prompt', '')}",
             "seed": 200,
