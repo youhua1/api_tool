@@ -88,35 +88,25 @@ class SdWebui:
         if data_dict is None:
             return None
 
+        if "ratio" in hyperparameter_data:
+            # 获得分辨率
+            enable_sdxl = True
+            if "sdxl_vae.safetensors" in data_dict:
+                enable_sdxl = False
+
+            # 获得输入比例
+            input_width, input_height = hyperparameter_data["ratio"].split(":")
+            input_ratio = round(int(input_width) / int(input_height), 2)
+
+            key = self.utils.find_closest_key(
+                input_ratio, bucket.get_resolution_dict(enable_sdxl))
+            width, height = bucket.get_resolution_dict(enable_sdxl)[key].split(
+                "_")
+
         # 替换占位符
-        new_data = (
-            data_dict.replace(
-                "$width$",
-                str(hyperparameter_data.get("width", width))).replace(
-                    "$height$",
-                    str(hyperparameter_data.get("height", height))).replace(
-                        "$width_hr$", str(width * 1.5)).replace(
-                            "$height_hr$", str(height * 1.5)).replace(
-                                "xxxxx", '"xxxxx"').replace(
-                                    "$origin_base64_placeholder$",
-                                    image_base64)
-        ).replace(
-            "$magic_prompt$",
-            'false'
-        ).replace("$prompt_placeholder$", hyperparameter_data.get(
-            "prompt", ""
-        )).replace("$negative_prompt_placeholder$",
-                   hyperparameter_data.get("negative_prompt", "")).replace(
-                       "$seed$", f'{hyperparameter_data.get("seed", -1)}'
-                   ).replace(
-                       "$steps$",
-                       f'{hyperparameter_data.get("steps", 20)}'
-                   ).replace(
-                       "$cfg_scale$",
-                       f'{hyperparameter_data.get("cfg_scale", 7.5)}'
-                   ).replace(
-                       "$denoising_strength$",
-                       f'{hyperparameter_data.get("denoising_strength", 0.5)}')
+        replacements = bucket.get_replacements_sd_webui_base64_json_new(
+            int(width), int(height), image_base64, hyperparameter_data)
+        new_data = self.utils.replace_placeholders(data_dict, replacements)
         # 转换为json
         data_dict = json.loads(new_data)
 

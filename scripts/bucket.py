@@ -20,7 +20,7 @@ def get_aliyun_model_dict():
     return aliyun_model_dict
 
 
-# 存放sdxl分辨率的字典
+# 存放sd分辨率的字典
 def get_resolution_dict(enable_sd: bool = False):
     resolution_dict_xl = {
         0.25: "512_2048",
@@ -68,7 +68,9 @@ def get_resolution_dict(enable_sd: bool = False):
 
     resolution_dict_sd = {
         0.67: "512_768",
+        0.75: "512_682",
         1: "512_512",
+        1.3: "682_512",
         1.5: "768_512",
     }
     return resolution_dict_sd if enable_sd else resolution_dict_xl
@@ -577,3 +579,54 @@ def base64_json_dict(data_dict: dict, models_path: str, image_url: str):
         "payload": data_dict["sd_params"],
     }
     return base64_json_dict
+
+
+def get_replacements_sd_webui_base64_json_new(
+    width: int,
+    height: int,
+    image_base64: str,
+    hyperparameter_data: dict,
+):
+    replacements = {
+        "$width$":
+        str(hyperparameter_data.get("width", int(width))),
+        "$height$":
+        str(hyperparameter_data.get("height", int(height))),
+        "$width_hr$":
+        str(int(width) * 1.5),
+        "$height_hr$":
+        str(int(height) * 1.5),
+        "xxxxx":
+        '"xxxxx"',
+        "$origin_base64_placeholder$":
+        image_base64,
+        "$magic_prompt$":
+        'false',
+        "$prompt_placeholder$":
+        hyperparameter_data.get("prompt", ""),
+        "$negative_prompt_placeholder$":
+        hyperparameter_data.get("negative_prompt", ""),
+        "$seed$":
+        f'{hyperparameter_data.get("seed", -1)}',
+        "$steps$":
+        f'{hyperparameter_data.get("steps", 20)}',
+        "$cfg_scale$":
+        f'{hyperparameter_data.get("cfg_scale", 7.5)}',
+        "$denoising_strength$":
+        f'{hyperparameter_data.get("denoising_strength", 0.5)}'
+    }
+    return replacements
+
+
+def get_replacements_image_to_json_get_image_info_json_explore():
+    replacements = {
+        "xxxxx": '"xxxxx"',
+        "199": "$magic_prompt$",
+        "200": "$seed$",
+        "201": "$steps$",
+        "202": "$cfg_scale$",
+        "203": "$width$",
+        "204": "$height$",
+        "205": "$denoising_strength$"
+    }
+    return replacements

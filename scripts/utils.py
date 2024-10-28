@@ -5,6 +5,7 @@ import os
 import shutil
 import sys
 import uuid
+import re
 from PIL import Image
 import urllib.request
 from scripts.handle_exception import HandleException
@@ -77,6 +78,20 @@ class Utils:
             resize_width = int(512 * width / height)
 
         return resize_width, resize_height
+
+    def find_closest_key(self, input_ratio, resolution_dict):
+        # 初始化最小差值和对应的键
+        min_diff = float('inf')
+        closest_key = None
+
+        # 遍历字典的键，找到与输入值差值最小的键
+        for key in resolution_dict:
+            diff = abs(key - input_ratio)
+            if diff < min_diff:
+                min_diff = diff
+                closest_key = key
+
+        return closest_key
 
     # base64保存图片
     def save_image(self, base64_str, folder):
@@ -165,3 +180,9 @@ class Utils:
             f for f in Path(folder_path).glob("*")
             if f.suffix.lower() in filter_list
         ]
+
+    # 替换占位符 text替换文本 replacements替换字典
+    def replace_placeholders(self, text, replacements):
+        # 使用正则表达式进行多个替换
+        regex = re.compile('|'.join(map(re.escape, replacements.keys())))
+        return regex.sub(lambda match: replacements[match.group(0)], text)

@@ -230,10 +230,7 @@ class ImageToJson:
                                                   enable_t2i)
 
         data_str = json.dumps(data_json, indent=4)
-        data_str = (data_str.replace('"xxxxx"', "xxxxx").replace("199", "$magic_prompt$").replace(
-            "200", "$seed$").replace("201", "$steps$").replace("202", "$cfg_scale$").replace("203", "$width$").replace(
-                "204", "$height$").replace("205", "$denoising_strength$"))
-
+        data_str = self.utils.replace_placeholders(data_str, bucket.get_replacements_image_to_json_get_image_info_json_explore())
         return data_str
 
     def batch_image_info_json(

@@ -18,9 +18,10 @@ class Barrelling:
         # SDXL模式下的近似比例选择
         if ordinary_ratio < 0.25 or ordinary_ratio > 4:
             return -1
-        for key in bucket.get_resolution_dict().keys():
-            if key >= ordinary_ratio:
-                return key
+
+        key = self.utils.find_closest_key(ordinary_ratio,
+                                          bucket.get_resolution_dict())
+        return key
 
     # 获得sd最近值
     def get_nearest_ratio_sd(self, ordinary_ratio):
