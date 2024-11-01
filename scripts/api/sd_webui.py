@@ -100,7 +100,9 @@ class SdWebui:
         if data_dict is None:
             return None
 
-        hyperparameter_data = self.get_hyperparameter_data()[hyperparameter_id]
+        hyperparameter_data = self.get_hyperparameter_data(
+        )[hyperparameter_id] if self.get_hyperparameter_data(
+        ) is not None else {}
 
         if "ratio" in hyperparameter_data:
             # 获得分辨率
