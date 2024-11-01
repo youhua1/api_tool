@@ -89,7 +89,7 @@ def sagemaker_params_dict(dick_info: dict,
         "origin_placeholder": "$origin_placeholder$",
         "user_account": "$user_account$",
         "template_id": "$temp_id$",
-        "template_name": "$temp_name$",
+        "template_name": "$temp_name$"
     }
 
     # 获取模板类型
@@ -101,6 +101,11 @@ def sagemaker_params_dict(dick_info: dict,
     vae = dick_info.get("VAE", "")
     if vae:
         sagemaker_params_dict["models"]["VAE"] = [vae]
+
+    # 添加识别模型字段
+    if vae == "sdxl_vae.safetensors" and sagemaker_params_dict[
+            "task_type"] == "loremode":
+        sagemaker_params_dict["sd_v"] = "xl"
 
     # 获取ControlNet模型列表
     controlnet = dick_info.get("controlnet", [])
@@ -222,7 +227,7 @@ def i2i_params_dict_explore(dick_info: dict):
     i2i_params_dict = {
         "task": "img2img",
         "origin_prompt": "$origin_prompt$",
-        "magic_prompt": 199,
+        "magic_prompt": "$magic_prompt$",
         "params": {
             "override_settings": {
                 "CLIP_stop_at_last_layers":
@@ -235,7 +240,7 @@ def i2i_params_dict_explore(dick_info: dict):
             "prompt": f"{dick_info.get('prompt', '')}$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info.get('Negative prompt', '')}",
-            "seed": 200,
+            "seed": "$seed$",
             "subseed": -1,
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
@@ -243,14 +248,19 @@ def i2i_params_dict_explore(dick_info: dict):
             "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
-            "steps": 201,
-            "cfg_scale": 202,
-            "width": 203,
-            "height": 204,
-            "denoising_strength": 205,
+            "steps": "$steps$",
+            "cfg_scale": "$cfg_scale$",
+            "width": "$width$",
+            "height": "$height$",
+            "denoising_strength": "$denoising_strength$",
             "resize_mode": dick_info.get("resize_mode", 1)
         },
     }
+
+    if dick_info.get("VAE", "vae-ft-mse-840000-ema-pruned.safetensors"
+                     ) == "sdxl_vae.safetensors":
+        i2i_params_dict["params"]["width"] = "$width_hr$"
+        i2i_params_dict["params"]["height"] = "$height_hr$"
 
     # # 获得ControlNet列表
     # controlnet_list = dick_info.get("controlnet", [])
@@ -377,7 +387,7 @@ def t2i_params_dict_explore(dick_info: dict):
     t2i_params_dict = {
         "task": "txt2img",
         "origin_prompt": "$origin_prompt$",
-        "magic_prompt": 199,
+        "magic_prompt": "$magic_prompt$",
         "params": {
             "override_settings": {
                 "CLIP_stop_at_last_layers":
@@ -389,7 +399,7 @@ def t2i_params_dict_explore(dick_info: dict):
             "prompt": f"{dick_info.get('prompt', '')},$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info.get('Negative prompt', '')}",
-            "seed": 200,
+            "seed": "$seed$",
             "subseed": -1,
             "subseed_strength": 0,
             "seed_resize_from_h": -1,
@@ -397,10 +407,10 @@ def t2i_params_dict_explore(dick_info: dict):
             "sampler_name": dick_info.get("Sampler", "DPM++ 2M Karras"),
             "batch_size": 1,
             "n_iter": 1,
-            "steps": 201,
-            "cfg_scale": 202,
-            "width": 203,
-            "height": 204,
+            "steps": "$steps$",
+            "cfg_scale": "$cfg_scale$",
+            "width": "$width$",
+            "height": "$height$",
             "enable_hr": False,
             "hr_second_pass_steps": 0,
             "hr_scale": 2,
@@ -409,6 +419,10 @@ def t2i_params_dict_explore(dick_info: dict):
         },
     }
 
+    if dick_info.get("VAE", "vae-ft-mse-840000-ema-pruned.safetensors"
+                     ) == "sdxl_vae.safetensors":
+        t2i_params_dict["params"]["width"] = "$width_hr$"
+        t2i_params_dict["params"]["height"] = "$height_hr$"
     # # 获得ControlNet列表
     # controlnet_list = dick_info.get("controlnet", [])
     # if controlnet_list:
@@ -620,13 +634,13 @@ def get_replacements_sd_webui_base64_json_new(
 
 def get_replacements_image_to_json_get_image_info_json_explore():
     replacements = {
-        "xxxxx": '"xxxxx"',
-        "199": "$magic_prompt$",
-        "200": "$seed$",
-        "201": "$steps$",
-        "202": "$cfg_scale$",
-        "203": "$width$",
-        "204": "$height$",
-        "205": "$denoising_strength$"
+        '"xxxxx"': "xxxxx",
+        '"$magic_prompt$"': "$magic_prompt$",
+        '"$seed$"': "$seed$",
+        '"$steps$"': "$steps$",
+        '"$cfg_scale$"': "$cfg_scale$",
+        '"$width$"': "$width$",
+        '"$height$"': "$height$",
+        '"$denoising_strength$"': "$denoising_strength$"
     }
     return replacements
