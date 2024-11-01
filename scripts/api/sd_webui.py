@@ -13,10 +13,13 @@ class SdWebui:
         self,
         models_json_path: str = "./json/",
         data_image_url_path: str = "./image/inputs/url/image_url.json",
+        hyperparameter_data_path:
+        str = "./json/t2i_test/hyperparameter_data.json",
         output_image_folder: str = "./image/outputs/",
     ):
         self.models_json_path = models_json_path
         self.data_image_url_path = data_image_url_path
+        self.hyperparameter_data_path = hyperparameter_data_path
         self.output_image_folder = output_image_folder
         self.logger = get_logger("SdWebui")
         self.utils = Utils(self.logger)
@@ -29,6 +32,16 @@ class SdWebui:
             None,
         )
         return payload
+
+    # 获取hyperparameter_data
+    def get_hyperparameter_data(self):
+        if self.hyperparameter_data_path is None:
+            return {}
+
+        hyperparameter_data = self.handle_exception.txt_error_handler(
+            self.hyperparameter_data_path, "r", "json_read")
+
+        return hyperparameter_data
 
     # 图片url转为列表
     def data_image_url(self):
@@ -48,11 +61,8 @@ class SdWebui:
         data_json.sort()
         return data_json
 
-    def base64_json_new(self,
-                        url: str,
-                        image_url_id: int,
-                        models_id: int,
-                        hyperparameter_data: dict = {}):
+    def base64_json_new(self, url: str, image_url_id: int, models_id: int,
+                        hyperparameter_id: int):
         image_url = self.data_image_url()
         if not image_url:
             self.logger.error("图片url列表为空")
@@ -81,12 +91,16 @@ class SdWebui:
         if not (0 <= models_id < len(models_json_data)):
             self.logger.error("模型 ID超出范围")
             return None
+
+        # 获取模型json
         models_json_name = models_json_data[models_id]
 
         data_dict = self.handle_exception.txt_error_handler(
             models_json_name, "r", "read")
         if data_dict is None:
             return None
+
+        hyperparameter_data = self.get_hyperparameter_data()[hyperparameter_id]
 
         if "ratio" in hyperparameter_data:
             # 获得分辨率
@@ -102,6 +116,8 @@ class SdWebui:
                 input_ratio, bucket.get_resolution_dict(enable_sdxl))
             width, height = bucket.get_resolution_dict(enable_sdxl)[key].split(
                 "_")
+            data_dict = data_dict.replace("$width_hr$", "$width$").replace(
+                "$height_hr$", "$height$")
 
         # 替换占位符
         replacements = bucket.get_replacements_sd_webui_base64_json_new(
@@ -376,14 +392,11 @@ class SdWebui:
             if index == len(payload) - 1:
                 return response_dict
 
-    def main_process(self,
-                     url: str,
-                     models_id: int,
-                     image_url_id: int,
-                     hyperparameter_data: dict = {}):
+    def main_process(self, url: str, models_id: int, image_url_id: int,
+                     hyperparameter_id: int):
         # 解析超参数
         main_json = self.base64_json_new(url, image_url_id, models_id,
-                                         hyperparameter_data)
+                                         hyperparameter_id)
         if main_json is None:
             return
 

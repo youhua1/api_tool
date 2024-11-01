@@ -607,9 +607,9 @@ def get_replacements_sd_webui_base64_json_new(
         "$height$":
         str(hyperparameter_data.get("height", int(height))),
         "$width_hr$":
-        str(int(width) * 1.5),
+        str(int(width * 2)),
         "$height_hr$":
-        str(int(height) * 1.5),
+        str(int(height * 2)),
         "xxxxx":
         '"xxxxx"',
         "$origin_base64_placeholder$":
@@ -641,6 +641,8 @@ def get_replacements_image_to_json_get_image_info_json_explore():
         '"$cfg_scale$"': "$cfg_scale$",
         '"$width$"': "$width$",
         '"$height$"': "$height$",
+        '"$width_hr$"': "$width_hr$",
+        '"$height_hr$"': "$height_hr$",
         '"$denoising_strength$"': "$denoising_strength$"
     }
     return replacements
