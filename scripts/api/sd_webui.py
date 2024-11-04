@@ -13,8 +13,7 @@ class SdWebui:
         self,
         models_json_path: str = "./json/",
         data_image_url_path: str = "./image/inputs/url/image_url.json",
-        hyperparameter_data_path:
-        str = "./json/t2i_test/hyperparameter_data.json",
+        hyperparameter_data_path: str = None,
         output_image_folder: str = "./image/outputs/",
     ):
         self.models_json_path = models_json_path
@@ -100,9 +99,11 @@ class SdWebui:
         if data_dict is None:
             return None
 
-        hyperparameter_data = self.get_hyperparameter_data(
-        )[hyperparameter_id] if self.get_hyperparameter_data(
-        ) is not None else {}
+        # 获取hyperparameter_data
+        hyperparameter_data = {}
+        if self.get_hyperparameter_data() is not None:
+            hyperparameter_data = self.get_hyperparameter_data(
+            )[hyperparameter_id]
 
         if "ratio" in hyperparameter_data:
             # 获得分辨率
