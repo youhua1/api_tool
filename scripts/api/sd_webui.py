@@ -35,7 +35,7 @@ class SdWebui:
     # 获取hyperparameter_data
     def get_hyperparameter_data(self):
         if self.hyperparameter_data_path is None:
-            return {}
+            return None
 
         hyperparameter_data = self.handle_exception.txt_error_handler(
             self.hyperparameter_data_path, "r", "json_read")
