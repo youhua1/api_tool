@@ -61,7 +61,7 @@ class SdWebui:
         return data_json
 
     def base64_json_new(self, url: str, image_url_id: int, models_id: int,
-                        hyperparameter_id: int):
+                        hyperparameter_id: int = 0):
         image_url = self.data_image_url()
         if not image_url:
             self.logger.error("图片url列表为空")
@@ -208,7 +208,7 @@ class SdWebui:
         count_faces = response.json().get("faces_count", 0)
         sequence = ",".join(str(i) for i in range(count_faces))
         main_json = json.loads(
-            json.dumps(main_json).replace("$facecount_placeholder$", sequence))
+            json.dumps(main_json).replace('"$facecount_placeholder$"', sequence))
 
         time = response.elapsed.total_seconds()
         response_dict["main_json"] = main_json
