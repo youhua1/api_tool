@@ -237,7 +237,7 @@ def i2i_params_dict_explore(dick_info: dict):
                               "vae-ft-mse-840000-ema-pruned.safetensors")
             },
             "init_images": ["$origin_base64_placeholder$"],
-            "prompt": f"{dick_info.get('prompt', '')}$prompt_placeholder$,",
+            "prompt": f"{dick_info.get('prompt', '')},$prompt_placeholder$,",
             "negative_prompt":
             f"$negative_prompt_placeholder$,{dick_info.get('Negative prompt', '')}",
             "seed": "$seed$",
