@@ -123,7 +123,7 @@ def sagemaker_params_dict(dick_info: dict,
     if lora:
         lora_list = [
             f"{lora_model.split(':')[0]}.safetensors" for lora_model in lora
-            if ": " in lora_model
+            if len(lora_model.split(":")[1].strip()) == 12
         ]
         if lora_list:
             sagemaker_params_dict["models"]["Lora"] = lora_list
@@ -134,7 +134,7 @@ def sagemaker_params_dict(dick_info: dict,
         embeddings_list = [
             embeddings_models_dict().get(embeddings_model.split(":")[0])
             for embeddings_model in embeddings if embeddings_models_dict().get(
-                embeddings_model.split(":")[0]) is not None and ": " in embeddings_model
+                embeddings_model.split(":")[0]) is not None
         ]
         if embeddings_list:
             sagemaker_params_dict["models"]["embeddings"] = embeddings_list
