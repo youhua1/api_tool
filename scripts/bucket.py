@@ -119,19 +119,25 @@ def sagemaker_params_dict(dick_info: dict,
         sagemaker_params_dict["models"]["ControlNet"] = controlnet_models_list
 
     # 获取Lora模型列表
-    lora = dick_info.get("Lora hashes", "")
+    lora = dick_info.get("Lora", [])
     if lora:
-        sagemaker_params_dict["models"]["Lora"] = [f"{lora}.safetensors"]
+        lora_list = [
+            f"{lora_model.split(':')[0]}.safetensors" for lora_model in lora
+            if ": " in lora_model
+        ]
+        if lora_list:
+            sagemaker_params_dict["models"]["Lora"] = lora_list
 
     # 获取embeddings
-    embeddings = dick_info.get("embeddings", [])
+    embeddings = dick_info.get("Embeddings", [])
     if embeddings:
         embeddings_list = [
             embeddings_models_dict().get(embeddings_model.split(":")[0])
             for embeddings_model in embeddings if embeddings_models_dict().get(
-                embeddings_model.split(":")[0]) is not None
+                embeddings_model.split(":")[0]) is not None and ": " in embeddings_model
         ]
-        sagemaker_params_dict["models"]["embeddings"] = embeddings_list
+        if embeddings_list:
+            sagemaker_params_dict["models"]["embeddings"] = embeddings_list
 
     return sagemaker_params_dict
 

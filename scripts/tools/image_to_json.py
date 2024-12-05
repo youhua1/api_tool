@@ -27,11 +27,13 @@ class ImageToJson:
 
         parameter = {}
         embeddings_components = []
+        lora_components = []
         image_info = metadata["parameters"]
         image_info = (image_info.replace("\n", "").replace('"', "").replace(
             "Negative prompt: ",
             ",Negative prompt: ").replace("Steps:", ",Steps:"))
 
+        # 处理embeddings
         if "TI hashes:" in image_info:
             # 提取 embeddings 部分并移除
             embeddings_start = image_info.find("TI hashes: ") + len(
@@ -46,6 +48,23 @@ class ImageToJson:
             embeddings_components = re.split(
                 r",\s*(?=[A-Za-z\s0-9])",
                 embeddings,
+            )
+
+        # 处理lora
+        if "Lora hashes:" in image_info:
+            # 提取 Lora 部分并移除
+            lora_start = image_info.find("Lora hashes: ") + len(
+                "Lora hashes: ")
+            lora_end = image_info.find(", Version:")
+            lora = image_info[lora_start:lora_end]
+
+            # 移除 Lora 信息
+            image_info = (image_info[:lora_start - len("Lora hashes: ")] +
+                          image_info[lora_end:])
+
+            lora_components = re.split(
+                r",\s*(?=[A-Za-z\s0-9])",
+                lora,
             )
 
         # 使用正则表达式分割组件
@@ -115,7 +134,10 @@ class ImageToJson:
                 ADetailer_detect = False
 
         if embeddings_components:
-            parameter["embeddings"] = embeddings_components
+            parameter["Embeddings"] = embeddings_components
+
+        if lora_components:
+            parameter["Lora"] = lora_components
 
         if controlnet_list:
             parameter["controlnet"] = controlnet_list
@@ -230,7 +252,10 @@ class ImageToJson:
                                                   enable_t2i)
 
         data_str = json.dumps(data_json, indent=4)
-        data_str = self.utils.replace_placeholders(data_str, bucket.get_replacements_image_to_json_get_image_info_json_explore())
+        data_str = self.utils.replace_placeholders(
+            data_str,
+            bucket.get_replacements_image_to_json_get_image_info_json_explore(
+            ))
         return data_str
 
     def batch_image_info_json(
