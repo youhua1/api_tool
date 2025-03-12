@@ -154,6 +154,16 @@ def wd1_4_params_dict(wd1_4_threshold: str = 0.85):
     return wd1_4_params_dict
 
 
+def default_params_dict(dick_info: dict):
+    default_params_dict = {
+        "seed": -1,
+        "steps": dick_info.get("Steps", 20),
+        "cfg_scale": dick_info.get("CFG scale", 7.0),
+        "denoising_strength": dick_info.get("Denoising strength", 0.75)
+    }
+    return default_params_dict
+
+
 def i2i_params_dict_ai_fasic_art(dick_info: dict):
     i2i_params_dict = {
         "task": "img2img",

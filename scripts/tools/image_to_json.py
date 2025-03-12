@@ -201,6 +201,8 @@ class ImageToJson:
         data_json["sagemaker_params"] = bucket.sagemaker_params_dict(
             dick_info, template_name)
 
+        # 添加 default_params
+        data_json["default_params"] = bucket.default_params_dict(dick_info)
         # 设置空列表
         sd_params_list = []
 
@@ -209,6 +211,7 @@ class ImageToJson:
             sd_params_list.append(bucket.t2i_params_dict_explore(dick_info))
             # 修改t2i sagemaker 参数
             data_json["sagemaker_params"].pop("origin_placeholder", None)
+            data_json["default_params"].pop("denoising_strength", None)
         else:
             # 添加i2i参数
             sd_params_list.append(bucket.i2i_params_dict_explore(dick_info))

@@ -1,5 +1,8 @@
 import base64
 import io
+from io import BytesIO
+import cv2
+import numpy as np
 import logging
 import os
 import shutil
@@ -56,6 +59,52 @@ class Utils:
                 return img
         except Exception as e:
             self.logging.error(f"图片解析失败: {e}")
+            return None
+
+    # 将 Base64 转换为cv
+    def cv2_base64_to_image(self, base64_str):
+        try:
+            if ',' in base64_str:
+                base64_str = base64_str.split(',')[1]
+            img_data = base64.b64decode(base64_str)
+            img = Image.open(BytesIO(img_data)).convert('L')
+            img_array = np.array(img, dtype=np.uint8)
+            return img_array
+        except Exception as e:
+            self.logging.error(f"Base64 解码失败: {str(e)}")
+            return None
+
+    # 将cv图像转换为 Base64
+    def cv2_image_to_base64(self, image):
+        _, buffer = cv2.imencode('.png', image)
+        return base64.b64encode(buffer).decode('utf-8')
+
+    def process_masks(self, face_mask_base64, body_mask_base64, threshold=127):
+        try:
+            # 解码蒙版
+            face_mask = self.cv2_base64_to_image(face_mask_base64)
+            body_mask = self.cv2_base64_to_image(body_mask_base64)
+
+            # 尺寸检查
+            if face_mask.shape != body_mask.shape:
+                raise ValueError("蒙版尺寸不匹配")
+
+            # 判断蒙版是否为 0 255
+            face_mask_binary = (face_mask > threshold).astype(
+                np.uint8) * 255 if np.any((face_mask != 0)
+                                          & (face_mask != 255)) else face_mask
+            body_mask_binary = (body_mask > threshold).astype(
+                np.uint8) * 255 if np.any((body_mask != 0)
+                                          & (body_mask != 255)) else body_mask
+
+            # 蒙版减法
+            new_mask = np.clip(body_mask_binary - face_mask_binary, 0, 255)
+            return self.cv2_image_to_base64(new_mask)
+        except ValueError as ve:
+            self.logging.error(f"值错误: {str(ve)}")
+            return None
+        except Exception as e:
+            self.logging.error(f"处理失败: {str(e)}")
             return None
 
     # 获取合适的图片大小

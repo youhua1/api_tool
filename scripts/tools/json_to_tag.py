@@ -56,6 +56,7 @@ class JsonToTag:
         ]
 
         merge_tags_string = ", ".join(merge_tags_list)
+        merge_tags_string = merge_tags_string.replace("_", " ")
         txt_path = json_file.with_name(filename).with_suffix(".txt")
         self.handle_exception.txt_error_handler(txt_path, "w", "write",
                                                 merge_tags_string)
