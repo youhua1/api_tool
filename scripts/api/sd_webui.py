@@ -150,6 +150,71 @@ class SdWebui:
 
         return new_main_json
 
+    # 处理参数
+    def base64_json_invocations(self,
+                                url: str,
+                                image_url_id: int,
+                                models_id: int,
+                                hyperparameter_id: int = 0):
+        # 处理图片
+        # ==========================
+        image_url = self.data_image_url()
+        if not image_url:
+            self.logger.error("图片url列表为空")
+            return None
+
+        if not (0 <= image_url_id < len(image_url)):
+            self.logger.error("图片URL ID超出范围")
+            return None
+
+        image_url = image_url[image_url_id]
+
+        # 获得模板json
+        # ==========================
+        models_json_data = self.data_models_json()
+        if not models_json_data:
+            self.logger.error("模型json列表为空")
+            return None
+
+        if not (0 <= models_id < len(models_json_data)):
+            self.logger.error("模型 ID超出范围")
+            return None
+
+        models_json_name = models_json_data[models_id]
+
+        data_dict = self.handle_exception.txt_error_handler(
+            models_json_name, "r", "read")
+        if data_dict is None:
+            return None
+
+        # 处理参数
+        # ==========================
+
+        # 若有超参数，则获取超参数
+        hyperparameter_data = {}
+        if self.get_hyperparameter_data() is not None:
+            hyperparameter_data = self.get_hyperparameter_data(
+            )[hyperparameter_id]
+
+        data_dict = data_dict.replace("$image_url$", image_url).replace(
+            "$origin_prompt$", hyperparameter_data.get("prompt", ""))
+        # 转换为json
+        data_dict = json.loads(data_dict)
+
+        # 获取模型路径字典
+        models_path = self.get_models_path_json(url)
+        if models_path is None:
+            return None
+
+        new_main_json = bucket.base64_json_dict(data_dict, models_path,
+                                                image_url)
+        new_main_json["task"] = "loremode"
+
+        self.logger.info(f"使用的图片: {image_url}")
+        self.logger.info(f"使用的json: {models_json_name}")
+
+        return new_main_json
+
     # 获得模型路径
     def get_models_path_json(self, url: str):
         reponse = self.handle_exception.request_get_handler(
@@ -382,17 +447,26 @@ class SdWebui:
             return response_dict
 
         # 处理蒙版
+        face_image_base64_0 = face_response.json()["masks"][0]
+        face_image_base64_1 = face_response.json()["masks"][1]
         face_image_base64 = face_response.json()["masks"][2]
+        humans_image_base64_0 = humans_response.json()["masks"][0]
+        humans_image_base64_1 = humans_response.json()["masks"][1]
         humans_image_base64 = humans_response.json()["masks"][2]
-        mask_image_base64 = self.utils.process_masks(face_image_base64,
-                                                     humans_image_base64)
+
+        # mask_image_base64 = self.utils.process_masks(face_image_base64,
+        #                                              humans_image_base64)
 
         # 更新响应字典
         sam_time = face_response.elapsed.total_seconds(
         ) + humans_response.elapsed.total_seconds()
         self.logger.info(f"{url}_sam时间: {sam_time} seconds")
         response_dict["time"] += sam_time
-        response_dict["image_base64"] = mask_image_base64
+        response_dict["image_base64_0"] = humans_image_base64_0
+        response_dict["image_base64_1"] = humans_image_base64_1
+        response_dict["image_base64"] = humans_image_base64
+        response_dict["face_image_base64_0"] = face_image_base64_0
+        response_dict["face_image_base64_1"] = face_image_base64_1
         response_dict["face_image_base64"] = face_image_base64
         response_dict["main_json"] = main_json
         return response_dict
@@ -403,7 +477,7 @@ class SdWebui:
         response_dict = self.get_response_dict()
         response_dict["time"] = main_json.get("time", 0)
         image_base64 = main_json.get("image_base64", "")
-        face_sam_base64 = main_json.get("face_image_base64", "")
+        # face_sam_base64 = main_json.get("face_image_base64", "")
         main_json = main_json.get("main_json", main_json)
         cloth_swap_data_json = self.handle_json(main_json, "cloth_swap")
         cloth_swap_data_json["mask"] = image_base64
@@ -415,32 +489,35 @@ class SdWebui:
             self.logger.error(f"{url}_cloth_swap第一步失败")
             return response_dict
 
-        # 准备第二步数据
-        cloth_swap_data_json["init_images"][0] = _cloth_swap_response.json(
-        )["images"][0]
-        cloth_swap_data_json["mask"] = face_sam_base64
-        cloth_swap_data_json["denoising_strength"] = 0.65
-        cloth_swap_data_json["inpainting_mask_invert"] = 1
-        if "alwayson_scripts" in cloth_swap_data_json:
-            del cloth_swap_data_json["alwayson_scripts"]
+        # # 准备第二步数据
+        # cloth_swap_data_json["init_images"][0] = _cloth_swap_response.json(
+        # )["images"][0]
+        # cloth_swap_data_json["mask"] = face_sam_base64
+        # cloth_swap_data_json["denoising_strength"] = 0.65
+        # cloth_swap_data_json["inpainting_mask_invert"] = 1
+        # if "alwayson_scripts" in cloth_swap_data_json:
+        #     del cloth_swap_data_json["alwayson_scripts"]
 
-        # 第二步请求
-        cloth_swap_response = self.handle_exception.request_post_handler(
-            url=f"{url}/sdapi/v1/img2img", json=cloth_swap_data_json)
-        if cloth_swap_response is None or cloth_swap_response.status_code != 200:
-            self.logger.error(f"{url}_cloth_swap第二步失败")
-            return response_dict
+        # # 第二步请求
+        # cloth_swap_response = self.handle_exception.request_post_handler(
+        #     url=f"{url}/sdapi/v1/img2img", json=cloth_swap_data_json)
+        # if cloth_swap_response is None or cloth_swap_response.status_code != 200:
+        #     self.logger.error(f"{url}_cloth_swap第二步失败")
+        #     return response_dict
 
         # 计算总耗时
-        cloth_swap_time = _cloth_swap_response.elapsed.total_seconds(
-        ) + cloth_swap_response.elapsed.total_seconds()
+        cloth_swap_time = _cloth_swap_response.elapsed.total_seconds()
+        # +cloth_swap_response.elapsed.total_seconds()
         self.logger.info(f"{url}cloth_swap时间: {cloth_swap_time} seconds")
-        response_dict["image_base64"] = cloth_swap_response.json()["images"][0]
+        response_dict["image_base64"] = _cloth_swap_response.json(
+        )["images"][0]
         response_dict["time"] += cloth_swap_time
         return response_dict
 
-    def invocations_process(self, url: str, models_id: int, image_url_id: int):
-        main_json = self.base64_json_new(url, image_url_id, models_id)
+    def invocations_process(self, url: str, models_id: int, image_url_id: int,
+                            hyperparameter_id: int):
+        main_json = self.base64_json_invocations(url, image_url_id, models_id,
+                                                 hyperparameter_id)
 
         if main_json is None:
             return
@@ -509,12 +586,21 @@ class SdWebui:
             time += switching_model_time
 
         response_dict = self.handle_request(url, main_json)
+        image_base64_0 = response_dict.get("image_base64_0", "")
+        image_base64_1 = response_dict.get("image_base64_1", "")
         image_base64 = response_dict.get("image_base64", "")
+        face_image_base64_0 = response_dict.get("face_image_base64_0", "")
+        face_image_base64_1 = response_dict.get("face_image_base64_1", "")
+        face_image_base64 = response_dict.get("face_image_base64", "")
         time += response_dict.get("time", 0)
         self.logger.info(f"{url}_总时间: {time} seconds")
-
+        self.utils.save_image(image_base64_0, self.output_image_folder)
+        self.utils.save_image(image_base64_1, self.output_image_folder)
         file_name = self.utils.save_image(image_base64,
                                           self.output_image_folder)
+        self.utils.save_image(face_image_base64_0, self.output_image_folder)
+        self.utils.save_image(face_image_base64_1, self.output_image_folder)
+        self.utils.save_image(face_image_base64, self.output_image_folder)
         if not file_name:
             self.logger.warning("保存图片失败")
             return
